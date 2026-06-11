@@ -6,251 +6,656 @@
   <title>DataFutbolera — Estadísticas de Fútbol</title>
   <meta name="description" content="Estadísticas, tablas y resultados de las principales ligas de fútbol del mundo." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --green: #1a6b3a;
-      --green-light: #22913f;
-      --gold: #d4a017;
-      --dark: #0f1a14;
-      --surface: #162010;
-      --card: #1c2a1e;
-      --text: #e8f0e9;
-      --muted: #8aab8d;
-      --border: #2d4a30;
-    }
-    body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
 
-    /* HERO */
-    .hero {
-      background: linear-gradient(160deg, #0f1a14 0%, #1a3020 60%, #0f1a14 100%);
-      padding: 3rem 1.5rem 2rem;
+    :root {
+      /* Superficies */
+      --bg:           #0c0e12;
+      --surface-low:  #111317;
+      --surface:      #1a1c20;
+      --surface-high: #1e2024;
+      --surface-top:  #282a2e;
+
+      /* Texto */
+      --text:         #e2e2e8;
+      --text-muted:   #7a8a8a;
+      --text-dim:     #4a5a5a;
+
+      /* Borde */
+      --border:       rgba(255,255,255,0.07);
+      --border-hover: rgba(255,255,255,0.14);
+
+      /* Acento principal (verde — se sobreescribe por liga) */
+      --accent:       #00e476;
+      --accent-dim:   rgba(0,228,118,0.12);
+      --accent-glow:  0 0 16px rgba(0,228,118,0.25);
+
+      /* Acentos de liga */
+      --acc-pl:       #6c2bd9;   /* Premier — purpura */
+      --acc-liga:     #e01c33;   /* La Liga — rojo */
+      --acc-bund:     #d40000;   /* Bundesliga — carmesí */
+      --acc-seriea:   #0099cc;   /* Serie A — azul */
+      --acc-ligue1:   #acff00;   /* Ligue 1 — lima */
+      --acc-default:  #00e476;   /* resto — verde */
+
+      /* Tipografía */
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body:    'Inter', sans-serif;
+
+      /* Radio */
+      --r-sm: 4px;
+      --r:    6px;
+      --r-md: 8px;
+      --r-lg: 12px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── SIDEBAR ──────────────────────────────── */
+    .sidebar {
+      width: 56px;
+      background: var(--surface-low);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 0;
+      gap: 4px;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+    .sidebar-logo {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      color: var(--accent);
+      letter-spacing: 2px;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      padding: 8px 0 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px;
+      width: 100%;
+      text-align: center;
+    }
+    .nav-icon {
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: var(--r-md);
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.15s;
+      font-size: 17px;
+    }
+    .nav-icon:hover { background: var(--surface-high); color: var(--text); }
+    .nav-icon.active { background: var(--accent-dim); color: var(--accent); }
+    .sidebar-spacer { flex: 1; }
+
+    /* ── MAIN WRAPPER ─────────────────────────── */
+    .main {
+      margin-left: 56px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── TOPBAR ───────────────────────────────── */
+    .topbar {
+      height: 52px;
+      background: var(--surface-low);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+    .topbar-brand {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      letter-spacing: 2px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .topbar-nav {
+      display: flex;
+      gap: 2px;
+    }
+    .topbar-link {
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      border-radius: var(--r);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .topbar-link:hover { color: var(--text); background: var(--surface-high); }
+    .topbar-link.active { color: var(--accent); background: var(--accent-dim); }
+    .topbar-spacer { flex: 1; }
+    .search-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 10px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .search-wrap input {
+      background: var(--surface-high);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 7px 12px 7px 32px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 13px;
+      width: 220px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-wrap input::placeholder { color: var(--text-muted); }
+    .search-wrap input:focus { border-color: var(--accent); }
+
+    /* ── PAGE CONTENT ─────────────────────────── */
+    .page {
+      padding: 24px 20px;
+      flex: 1;
+    }
+
+    /* ── SECCIONES DE LIGAS ───────────────────── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin: 24px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .section-label:first-child { margin-top: 0; }
+
+    /* ── LEAGUE GRID ──────────────────────────── */
+    .league-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .league-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 14px 10px 12px;
+      cursor: pointer;
+      transition: all 0.18s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
       text-align: center;
       position: relative;
       overflow: hidden;
     }
-    .hero::before {
+    .league-card::before {
       content: '';
       position: absolute;
-      inset: 0;
-      background:
-        repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 41px),
-        repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 41px);
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--card-accent, var(--accent));
+      opacity: 0;
+      transition: opacity 0.18s;
     }
-    .logo { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; letter-spacing: 3px; color: #fff; line-height: 1; position: relative; }
-    .logo span { color: var(--gold); }
-    .tagline { font-size: 1rem; color: var(--muted); margin: 0.5rem 0 1.5rem; letter-spacing: 1px; position: relative; }
-    .search-bar { display: flex; gap: 8px; max-width: 480px; margin: 0 auto; position: relative; }
-    .search-bar input {
-      flex: 1; background: rgba(255,255,255,0.07); border: 1px solid var(--border);
-      border-radius: 8px; padding: 10px 14px; color: var(--text);
-      font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none;
-    }
-    .search-bar input::placeholder { color: var(--muted); }
-    .search-bar input:focus { border-color: var(--green-light); }
-    .search-bar button {
-      background: var(--green-light); border: none; border-radius: 8px;
-      padding: 10px 18px; color: #fff; font-size: 13px;
-      font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer;
-    }
-    .search-bar button:hover { background: var(--green); }
+    .league-card:hover { border-color: var(--border-hover); background: var(--surface-high); transform: translateY(-1px); }
+    .league-card:hover::before { opacity: 1; }
+    .league-card.active { border-color: var(--card-accent, var(--accent)); background: var(--surface-high); }
+    .league-card.active::before { opacity: 1; }
+    .league-flag { font-size: 1.5rem; line-height: 1; }
+    .league-name { font-size: 11px; font-weight: 600; color: var(--text); line-height: 1.3; }
+    .league-sub  { font-size: 10px; color: var(--text-muted); }
 
-    /* SECTIONS */
-    .section { padding: 1.5rem 1.2rem 0.5rem; }
-    .section-title {
-      font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem;
-      letter-spacing: 1.5px; color: var(--gold); margin-bottom: 1rem;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-    /* LEAGUE GRID */
-    .league-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1rem; }
-    .league-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 12px; cursor: pointer;
-      transition: all 0.18s; display: flex; flex-direction: column;
-      align-items: center; gap: 6px; text-align: center;
-    }
-    .league-card:hover { border-color: var(--green-light); background: #243828; transform: translateY(-2px); }
-    .league-card.active { border-color: var(--gold); background: #2a2a18; }
-    .league-flag { font-size: 1.6rem; line-height: 1; }
-    .league-name { font-size: 12px; font-weight: 500; color: var(--text); line-height: 1.3; }
-    .league-sub { font-size: 10px; color: var(--muted); }
-
-    /* DETAIL PANEL */
+    /* ── DETAIL PANEL ─────────────────────────── */
     .detail-panel {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 12px; margin: 0 1.2rem 1.5rem; overflow: hidden; display: none;
+      background: var(--surface-low);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      margin: 16px 0 8px;
+      overflow: hidden;
+      display: none;
     }
     .detail-panel.open { display: block; }
-    .detail-header {
-      background: var(--card); padding: 1rem 1.2rem;
-      display: flex; align-items: center; gap: 10px;
-      border-bottom: 1px solid var(--border);
-    }
-    .detail-header .big-flag { font-size: 2rem; }
-    .detail-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 1px; color: #fff; }
-    .detail-header p { font-size: 12px; color: var(--muted); }
 
-    /* TABS */
-    .tabs { display: flex; border-bottom: 1px solid var(--border); }
+    /* Cabecera con glow según liga */
+    .detail-header {
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .detail-header::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--active-accent, var(--accent));
+    }
+    .detail-flag {
+      font-size: 2rem;
+      width: 52px; height: 52px;
+      background: var(--surface-top);
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .detail-meta { flex: 1; }
+    .detail-name {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      letter-spacing: 1px;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .detail-sub { font-size: 12px; color: var(--text-muted); }
+    .detail-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: var(--r-sm);
+      background: var(--accent-dim);
+      color: var(--active-accent, var(--accent));
+      border: 1px solid var(--active-accent, var(--accent));
+      flex-shrink: 0;
+    }
+
+    /* ── TABS ─────────────────────────────────── */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      padding: 0 8px;
+    }
     .tab {
-      padding: 10px 16px; font-size: 13px; font-weight: 500;
-      color: var(--muted); cursor: pointer;
-      border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s;
+      padding: 11px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
     }
     .tab:hover { color: var(--text); }
-    .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .tab.active { color: var(--active-accent, var(--accent)); border-bottom-color: var(--active-accent, var(--accent)); }
 
-    /* TABLE */
-    .table-wrap { padding: 1rem 1.2rem; overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th { color: var(--muted); font-weight: 500; padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--border); }
-    td { padding: 8px 8px; border-bottom: 1px solid rgba(45,74,48,0.4); color: var(--text); }
+    /* ── TAB CONTENT ──────────────────────────── */
+    .tab-content { padding: 0; }
+
+    /* Stats pills */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-pill {
+      background: var(--surface);
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+      color: var(--active-accent, var(--accent));
+      line-height: 1;
+    }
+    .stat-lbl {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* Tabla */
+    .table-wrap { overflow-x: auto; padding: 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    thead tr { background: var(--surface-high); }
+    th {
+      padding: 9px 10px;
+      text-align: left;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: var(--text);
+      white-space: nowrap;
+    }
     tr:last-child td { border-bottom: none; }
-    .pos { color: var(--muted); width: 24px; }
-    .team-name { font-weight: 500; }
-    .pts { font-weight: 500; color: var(--gold); }
-    .zone-cl td:first-child { border-left: 3px solid #1a9bfc; }
-    .zone-el td:first-child { border-left: 3px solid #f97316; }
-    .zone-rel td:first-child { border-left: 3px solid #e24b4a; }
+    tbody tr { transition: background 0.12s; }
+    tbody tr:hover { background: rgba(255,255,255,0.03); }
 
-    /* STATS BAR */
-    .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 1rem 1.2rem 0.5rem; }
-    .stat-pill { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; }
-    .stat-pill .num { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--gold); }
-    .stat-pill .lbl { font-size: 11px; color: var(--muted); }
+    .col-pos   { color: var(--text-muted); width: 28px; font-variant-numeric: tabular-nums; }
+    .col-team  { font-weight: 600; width: 100%; }
+    .col-pts   { font-weight: 700; color: var(--active-accent, var(--accent)); font-variant-numeric: tabular-nums; }
+    .col-num   { font-variant-numeric: tabular-nums; color: var(--text-muted); }
 
-    /* COMING SOON */
-    .coming-soon { padding: 2rem; text-align: center; color: var(--muted); font-size: 14px; }
+    /* Zona lateral en POS */
+    .zone-cl .col-pos  { border-left: 3px solid #1a9bfc; padding-left: 7px; }
+    .zone-el .col-pos  { border-left: 3px solid #f97316; padding-left: 7px; }
+    .zone-rel .col-pos { border-left: 3px solid #e24b4a; padding-left: 7px; }
 
-    /* LEGEND */
-    .legend { padding: 0.8rem 0; display: flex; gap: 1rem; font-size: 11px; color: var(--muted); }
-    .legend span { display: flex; align-items: center; gap: 4px; }
-    .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+    /* Leyenda */
+    .legend {
+      display: flex;
+      gap: 14px;
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--surface-high);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .legend-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
 
-    /* FOOTER */
+    /* Chips de forma (W/D/L) */
+    .form-chips { display: flex; gap: 3px; }
+    .chip {
+      width: 18px; height: 18px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .chip-w { background: rgba(0,228,118,0.15); color: #00e476; }
+    .chip-d { background: rgba(255,185,0,0.15);  color: #ffb900; }
+    .chip-l { background: rgba(226,75,74,0.15);  color: #e24b4a; }
+
+    /* Goleadores */
+    .scorer-podium {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .scorer-card {
+      background: var(--surface);
+      padding: 16px;
+      position: relative;
+    }
+    .scorer-card.rank-1 { background: var(--surface-high); }
+    .scorer-rank {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .scorer-rank.rank-1 { color: var(--active-accent, var(--accent)); }
+    .scorer-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+    .scorer-team { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
+    .scorer-stats { display: flex; gap: 16px; }
+    .scorer-stat-val {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+      color: var(--active-accent, var(--accent));
+      line-height: 1;
+    }
+    .scorer-stat-lbl {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Coming soon */
+    .coming-soon {
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .coming-soon-icon { font-size: 2rem; margin-bottom: 10px; }
+
+    /* ── FOOTER ───────────────────────────────── */
     .footer {
-      text-align: center; padding: 1.5rem; color: var(--muted);
-      font-size: 12px; border-top: 1px solid var(--border); margin-top: 1rem;
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-left: 56px;
+    }
+    .footer-brand { color: var(--accent); font-weight: 600; }
+    .footer-status { color: var(--accent); }
+
+    /* ── RESPONSIVE ───────────────────────────── */
+    @media (max-width: 600px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .footer { margin-left: 0; }
+      .topbar { padding: 0 12px; }
+      .topbar-nav { display: none; }
+      .search-wrap input { width: 160px; }
+      .scorer-podium { grid-template-columns: 1fr; }
+      .stats-bar { grid-template-columns: repeat(3,1fr); }
     }
   </style>
 </head>
 <body>
 
-<header class="hero">
-  <div class="logo">Data<span>Futbolera</span></div>
-  <p class="tagline">Estadísticas · Tablas · Resultados</p>
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Buscar equipo, jugador o liga..." />
-    <button onclick="handleSearch()">Buscar</button>
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">DF</div>
+  <div class="nav-icon active" title="Ligas">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/><path d="M2 12h20"/><path d="M12 2c2.5 2.5 4 6 4 10s-1.5 7.5-4 10"/></svg>
   </div>
-</header>
+  <div class="nav-icon" title="Tabla">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+  </div>
+  <div class="nav-icon" title="Goleadores">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  </div>
+  <div class="sidebar-spacer"></div>
+  <div class="nav-icon" title="Ajustes">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </div>
+</nav>
 
-<main>
-  <div class="section">
-    <div class="section-title">🇦🇷 Argentina</div>
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-brand">DataFutbolera</div>
+    <nav class="topbar-nav">
+      <div class="topbar-link active">Argentina</div>
+      <div class="topbar-link">Europa</div>
+      <div class="topbar-link">Sudamérica</div>
+      <div class="topbar-link">Otras</div>
+    </nav>
+    <div class="topbar-spacer"></div>
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="Buscar equipo, jugador o liga..." />
+    </div>
+  </header>
+
+  <!-- PAGE -->
+  <main class="page">
+
+    <!-- Argentina -->
+    <div class="section-label">🇦🇷 Argentina</div>
     <div class="league-grid" id="arg-grid"></div>
-  </div>
-  <div class="section">
-    <div class="section-title">🌍 Europa</div>
+
+    <!-- Europa -->
+    <div class="section-label">🌍 Europa</div>
     <div class="league-grid" id="eur-grid"></div>
-  </div>
-  <div class="section">
-    <div class="section-title">🌎 Sudamérica</div>
+
+    <!-- Sudamérica -->
+    <div class="section-label">🌎 Sudamérica</div>
     <div class="league-grid" id="sud-grid"></div>
-  </div>
-  <div class="section">
-    <div class="section-title">🌐 Otras ligas</div>
+
+    <!-- Otras -->
+    <div class="section-label">🌐 Otras ligas</div>
     <div class="league-grid" id="oth-grid"></div>
-  </div>
 
-  <div class="detail-panel" id="detailPanel">
-    <div class="detail-header">
-      <div class="big-flag" id="dFlag"></div>
-      <div>
-        <h2 id="dName"></h2>
-        <p id="dSub"></p>
+    <!-- Panel de detalle -->
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-header">
+        <div class="detail-flag" id="dFlag"></div>
+        <div class="detail-meta">
+          <div class="detail-name" id="dName"></div>
+          <div class="detail-sub" id="dSub"></div>
+        </div>
+        <div class="detail-badge" id="dBadge">Temporada 24/25</div>
       </div>
+      <div class="tabs">
+        <div class="tab active" onclick="setTab(this,'tabla')">Tabla</div>
+        <div class="tab" onclick="setTab(this,'goleadores')">Goleadores</div>
+        <div class="tab" onclick="setTab(this,'resultados')">Resultados</div>
+      </div>
+      <div class="tab-content" id="tabContent"></div>
     </div>
-    <div class="tabs">
-      <div class="tab active" onclick="setTab(this,'tabla')">Tabla</div>
-      <div class="tab" onclick="setTab(this,'goleadores')">Goleadores</div>
-      <div class="tab" onclick="setTab(this,'resultados')">Resultados</div>
-    </div>
-    <div id="tabContent"></div>
-  </div>
-</main>
 
+  </main>
+
+</div><!-- /main -->
+
+<!-- FOOTER -->
 <footer class="footer">
-  DataFutbolera &copy; 2025 &middot; Datos con fines informativos &middot;
-  <span style="color: var(--green-light);">En construcción 🚀</span>
+  <span>© 2025 <span class="footer-brand">DataFutbolera</span> · Datos con fines informativos</span>
+  <span class="footer-status">En construcción 🚀</span>
 </footer>
 
 <script>
+  /* ── DATOS DE LIGAS ────────────────────────── */
   const leagues = {
     arg: [
-      { id: 'lpf',     flag: '🇦🇷', name: 'Primera División',  sub: 'LPF · Argentina',   cup: false },
-      { id: 'bnac',    flag: '🇦🇷', name: 'Primera Nacional',   sub: 'B Nacional · Arg',  cup: false },
-      { id: 'bmet',    flag: '🇦🇷', name: 'Primera B Metro',    sub: 'Tercera · Arg',     cup: false },
-      { id: 'copa-arg',flag: '🇦🇷', name: 'Copa Argentina',     sub: 'Copa doméstica',    cup: true  },
+      { id:'lpf',      flag:'🇦🇷', name:'Primera División', sub:'LPF · Argentina',  cup:false, accent:'#00e476' },
+      { id:'bnac',     flag:'🇦🇷', name:'Primera Nacional',  sub:'B Nacional · Arg', cup:false, accent:'#00e476' },
+      { id:'bmet',     flag:'🇦🇷', name:'Primera B Metro',   sub:'Tercera · Arg',    cup:false, accent:'#00e476' },
+      { id:'copa-arg', flag:'🇦🇷', name:'Copa Argentina',    sub:'Copa doméstica',   cup:true,  accent:'#00e476' },
     ],
     eur: [
-      { id: 'pl',      flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', name: 'Premier League',     sub: 'Inglaterra',        cup: false },
-      { id: 'liga',    flag: '🇪🇸', name: 'La Liga',            sub: 'España',            cup: false },
-      { id: 'ligue1',  flag: '🇫🇷', name: 'Ligue 1',            sub: 'Francia',           cup: false },
-      { id: 'bund',    flag: '🇩🇪', name: 'Bundesliga',         sub: 'Alemania',          cup: false },
-      { id: 'seriea',  flag: '🇮🇹', name: 'Serie A',            sub: 'Italia',            cup: false },
-      { id: 'eredivisie', flag: '🇳🇱', name: 'Eredivisie',      sub: 'Países Bajos',      cup: false },
-      { id: 'tsl',     flag: '🇹🇷', name: 'Süper Lig',          sub: 'Turquía',           cup: false },
-      { id: 'ucl',     flag: '🇪🇺', name: 'Champions League',   sub: 'UEFA',              cup: true  },
-      { id: 'uel',     flag: '🇪🇺', name: 'Europa League',      sub: 'UEFA',              cup: true  },
-      { id: 'uecl',    flag: '🇪🇺', name: 'Conference League',  sub: 'UEFA',              cup: true  },
-      { id: 'fa',      flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', name: 'FA Cup',             sub: 'Inglaterra',        cup: true  },
-      { id: 'coparey', flag: '🇪🇸', name: 'Copa del Rey',       sub: 'España',            cup: true  },
-      { id: 'coupefr', flag: '🇫🇷', name: 'Coupe de France',    sub: 'Francia',           cup: true  },
-      { id: 'dfbp',    flag: '🇩🇪', name: 'DFB-Pokal',          sub: 'Alemania',          cup: true  },
-      { id: 'coppait', flag: '🇮🇹', name: 'Coppa Italia',       sub: 'Italia',            cup: true  },
-      { id: 'knvb',    flag: '🇳🇱', name: 'KNVB Beker',         sub: 'Países Bajos',      cup: true  },
-      { id: 'tkcup',   flag: '🇹🇷', name: 'Copa Turquía',       sub: 'Turquía',           cup: true  },
+      { id:'pl',          flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'Premier League',   sub:'Inglaterra',     cup:false, accent:'#6c2bd9' },
+      { id:'liga',        flag:'🇪🇸', name:'La Liga',          sub:'España',          cup:false, accent:'#e01c33' },
+      { id:'ligue1',      flag:'🇫🇷', name:'Ligue 1',          sub:'Francia',         cup:false, accent:'#acff00' },
+      { id:'bund',        flag:'🇩🇪', name:'Bundesliga',       sub:'Alemania',        cup:false, accent:'#d40000' },
+      { id:'seriea',      flag:'🇮🇹', name:'Serie A',          sub:'Italia',          cup:false, accent:'#0099cc' },
+      { id:'eredivisie',  flag:'🇳🇱', name:'Eredivisie',       sub:'Países Bajos',    cup:false, accent:'#ff6a00' },
+      { id:'tsl',         flag:'🇹🇷', name:'Süper Lig',        sub:'Turquía',         cup:false, accent:'#e01c33' },
+      { id:'ucl',         flag:'🇪🇺', name:'Champions League', sub:'UEFA',            cup:true,  accent:'#1a9bfc' },
+      { id:'uel',         flag:'🇪🇺', name:'Europa League',    sub:'UEFA',            cup:true,  accent:'#f97316' },
+      { id:'uecl',        flag:'🇪🇺', name:'Conference Lg',    sub:'UEFA',            cup:true,  accent:'#00cc88' },
+      { id:'fa',          flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'FA Cup',           sub:'Inglaterra',     cup:true,  accent:'#6c2bd9' },
+      { id:'coparey',     flag:'🇪🇸', name:'Copa del Rey',     sub:'España',          cup:true,  accent:'#e01c33' },
+      { id:'coupefr',     flag:'🇫🇷', name:'Coupe de France',  sub:'Francia',         cup:true,  accent:'#acff00' },
+      { id:'dfbp',        flag:'🇩🇪', name:'DFB-Pokal',        sub:'Alemania',        cup:true,  accent:'#d40000' },
+      { id:'coppait',     flag:'🇮🇹', name:'Coppa Italia',     sub:'Italia',          cup:true,  accent:'#0099cc' },
+      { id:'knvb',        flag:'🇳🇱', name:'KNVB Beker',       sub:'Países Bajos',    cup:true,  accent:'#ff6a00' },
+      { id:'tkcup',       flag:'🇹🇷', name:'Copa Turquía',     sub:'Turquía',         cup:true,  accent:'#e01c33' },
     ],
     sud: [
-      { id: 'libs',    flag: '🌎', name: 'Copa Libertadores',   sub: 'CONMEBOL',          cup: true  },
-      { id: 'suds',    flag: '🌎', name: 'Copa Sudamericana',   sub: 'CONMEBOL',          cup: true  },
+      { id:'libs', flag:'🌎', name:'Copa Libertadores', sub:'CONMEBOL', cup:true, accent:'#ffcc00' },
+      { id:'suds', flag:'🌎', name:'Copa Sudamericana', sub:'CONMEBOL', cup:true, accent:'#ff6a00' },
     ],
     oth: [
-      { id: 'mls',     flag: '🇺🇸', name: 'MLS',                sub: 'Estados Unidos',    cup: false },
-      { id: 'uscup',   flag: '🇺🇸', name: 'US Open Cup',        sub: 'EEUU',              cup: true  },
+      { id:'mls',   flag:'🇺🇸', name:'MLS',         sub:'Estados Unidos', cup:false, accent:'#e01c33' },
+      { id:'uscup', flag:'🇺🇸', name:'US Open Cup', sub:'EEUU',           cup:true,  accent:'#1a9bfc' },
     ]
   };
 
+  /* ── DATOS DE EJEMPLO ──────────────────────── */
   const sampleTable = [
-    { pos:1,  team:'Manchester City', pj:28, g:20, e:5, p:3,  gf:62, gc:24, pts:65, zone:'cl'  },
-    { pos:2,  team:'Arsenal',         pj:28, g:19, e:4, p:5,  gf:58, gc:28, pts:61, zone:'cl'  },
-    { pos:3,  team:'Liverpool',       pj:28, g:18, e:5, p:5,  gf:67, gc:35, pts:59, zone:'cl'  },
-    { pos:4,  team:'Aston Villa',     pj:28, g:16, e:4, p:8,  gf:55, gc:40, pts:52, zone:'cl'  },
-    { pos:5,  team:'Tottenham',       pj:28, g:13, e:6, p:9,  gf:50, gc:44, pts:45, zone:'el'  },
-    { pos:6,  team:'Chelsea',         pj:28, g:12, e:7, p:9,  gf:48, gc:42, pts:43, zone:'el'  },
-    { pos:7,  team:'Newcastle',       pj:28, g:12, e:6, p:10, gf:46, gc:41, pts:42, zone:''    },
-    { pos:8,  team:'Manchester Utd',  pj:28, g:10, e:6, p:12, gf:28, gc:41, pts:36, zone:''    },
-    { pos:18, team:'Luton Town',      pj:28, g:6,  e:4, p:18, gf:30, gc:60, pts:22, zone:'rel' },
-    { pos:19, team:'Burnley',         pj:28, g:4,  e:4, p:20, gf:24, gc:65, pts:16, zone:'rel' },
-    { pos:20, team:'Sheffield Utd',   pj:28, g:3,  e:4, p:21, gf:20, gc:72, pts:13, zone:'rel' },
+    { pos:1,  team:'Manchester City', pj:28, g:20, e:5, p:3,  gf:62, gc:24, dif:'+38', pts:65, zone:'cl',  form:['W','W','W','D','W'] },
+    { pos:2,  team:'Arsenal',         pj:28, g:19, e:4, p:5,  gf:58, gc:28, dif:'+30', pts:61, zone:'cl',  form:['W','W','D','W','W'] },
+    { pos:3,  team:'Liverpool',       pj:28, g:18, e:5, p:5,  gf:67, gc:35, dif:'+32', pts:59, zone:'cl',  form:['W','D','W','W','L'] },
+    { pos:4,  team:'Aston Villa',     pj:28, g:16, e:4, p:8,  gf:55, gc:40, dif:'+15', pts:52, zone:'cl',  form:['W','W','L','W','D'] },
+    { pos:5,  team:'Tottenham',       pj:28, g:13, e:6, p:9,  gf:50, gc:44, dif:'+6',  pts:45, zone:'el',  form:['D','W','W','L','W'] },
+    { pos:6,  team:'Chelsea',         pj:28, g:12, e:7, p:9,  gf:48, gc:42, dif:'+6',  pts:43, zone:'el',  form:['W','D','W','D','L'] },
+    { pos:7,  team:'Newcastle',       pj:28, g:12, e:6, p:10, gf:46, gc:41, dif:'+5',  pts:42, zone:'',    form:['L','W','W','D','W'] },
+    { pos:8,  team:'Manchester Utd',  pj:28, g:10, e:6, p:12, gf:28, gc:41, dif:'-13', pts:36, zone:'',    form:['L','L','W','D','L'] },
+    { pos:18, team:'Luton Town',      pj:28, g:6,  e:4, p:18, gf:30, gc:60, dif:'-30', pts:22, zone:'rel', form:['L','L','D','L','L'] },
+    { pos:19, team:'Burnley',         pj:28, g:4,  e:4, p:20, gf:24, gc:65, dif:'-41', pts:16, zone:'rel', form:['L','L','L','D','L'] },
+    { pos:20, team:'Sheffield Utd',   pj:28, g:3,  e:4, p:21, gf:20, gc:72, dif:'-52', pts:13, zone:'rel', form:['L','L','L','L','D'] },
   ];
 
   const sampleScorers = [
-    { pos:1, name:'Erling Haaland',    team:'Man City',    goles:24, as:7  },
-    { pos:2, name:'Ollie Watkins',     team:'Aston Villa', goles:19, as:12 },
-    { pos:3, name:'Cole Palmer',       team:'Chelsea',     goles:18, as:9  },
-    { pos:4, name:'Dominic Solanke',   team:'Bournemouth', goles:16, as:3  },
-    { pos:5, name:'Jarrod Bowen',      team:'West Ham',    goles:13, as:8  },
+    { pos:1, name:'E. Haaland',    team:'Manchester City',  goles:24, asist:7  },
+    { pos:2, name:'O. Watkins',    team:'Aston Villa',      goles:19, asist:12 },
+    { pos:3, name:'C. Palmer',     team:'Chelsea',          goles:18, asist:9  },
+    { pos:4, name:'D. Solanke',    team:'Bournemouth',      goles:16, asist:3  },
+    { pos:5, name:'J. Bowen',      team:'West Ham',         goles:13, asist:8  },
+    { pos:6, name:'P. Foden',      team:'Manchester City',  goles:12, asist:10 },
+    { pos:7, name:'M. Salah',      team:'Liverpool',        goles:11, asist:13 },
   ];
 
+  /* ── ESTADO ────────────────────────────────── */
   let activeLeague = null;
-  let activeTab = 'tabla';
+  let activeTab    = 'tabla';
 
+  /* ── HELPERS ───────────────────────────────── */
   function findLeague(id) {
     for (const k of Object.keys(leagues)) {
       const f = leagues[k].find(l => l.id === id);
@@ -258,10 +663,13 @@
     }
   }
 
+  /* Renderiza grillas */
   function renderGrid(gridId, arr) {
     const el = document.getElementById(gridId);
     el.innerHTML = arr.map(l => `
-      <div class="league-card" id="card-${l.id}" onclick="openLeague('${l.id}')">
+      <div class="league-card" id="card-${l.id}"
+           style="--card-accent: ${l.accent}"
+           onclick="openLeague('${l.id}')">
         <div class="league-flag">${l.flag}</div>
         <div class="league-name">${l.name}</div>
         <div class="league-sub">${l.sub}</div>
@@ -274,27 +682,57 @@
   renderGrid('sud-grid', leagues.sud);
   renderGrid('oth-grid', leagues.oth);
 
+  /* Aplica acento de liga al root */
+  function applyAccent(accent) {
+    document.documentElement.style.setProperty('--active-accent', accent);
+    document.documentElement.style.setProperty('--accent-dim', hexToRgba(accent, 0.12));
+  }
+
+  function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1,3),16);
+    const g = parseInt(hex.slice(3,5),16);
+    const b = parseInt(hex.slice(5,7),16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  /* ── ABRIR LIGA ────────────────────────────── */
   function openLeague(id) {
     const l = findLeague(id);
     if (!l) return;
+
+    /* Desactivar anterior */
     if (activeLeague) {
       const prev = document.getElementById('card-' + activeLeague);
       if (prev) prev.classList.remove('active');
     }
-    const card = document.getElementById('card-' + id);
-    if (card) { card.classList.add('active'); }
+    document.getElementById('card-' + id).classList.add('active');
     activeLeague = id;
+
+    /* Acento dinámico */
+    applyAccent(l.accent);
+
+    /* Cabecera */
     document.getElementById('dFlag').textContent = l.flag;
     document.getElementById('dName').textContent = l.name;
-    document.getElementById('dSub').textContent = l.sub;
-    document.getElementById('detailPanel').classList.add('open');
-    document.getElementById('detailPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    document.getElementById('dSub').textContent  = l.sub;
+
+    /* Badge */
+    const badge = document.getElementById('dBadge');
+    badge.textContent = l.cup ? 'Copa' : 'Temporada 24/25';
+
+    /* Mostrar panel */
+    const panel = document.getElementById('detailPanel');
+    panel.classList.add('open');
+    panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+    /* Resetear tabs */
     activeTab = 'tabla';
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab')[0].classList.add('active');
     renderTab();
   }
 
+  /* ── CAMBIAR TAB ───────────────────────────── */
   function setTab(el, tab) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
@@ -302,70 +740,134 @@
     renderTab();
   }
 
+  /* ── RENDERIZAR CONTENIDO ──────────────────── */
   function renderTab() {
-    const l = findLeague(activeLeague);
+    const l    = findLeague(activeLeague);
     const wrap = document.getElementById('tabContent');
+
     if (activeTab === 'tabla') {
       if (l.cup) {
-        wrap.innerHTML = `<div class="coming-soon">🏆 Fase de grupos y eliminatorias — próximamente</div>`;
-      } else {
         wrap.innerHTML = `
-          <div class="stats-bar">
-            <div class="stat-pill"><div class="num">20</div><div class="lbl">Equipos</div></div>
-            <div class="stat-pill"><div class="num">28</div><div class="lbl">Fecha</div></div>
-            <div class="stat-pill"><div class="num">341</div><div class="lbl">Partidos</div></div>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>Pts</th></tr>
-              </thead>
-              <tbody>
-                ${sampleTable.map(r => `
-                  <tr class="zone-${r.zone}">
-                    <td class="pos">${r.pos}</td>
-                    <td class="team-name">${r.team}</td>
-                    <td>${r.pj}</td><td>${r.g}</td><td>${r.e}</td><td>${r.p}</td>
-                    <td>${r.gf}</td><td>${r.gc}</td>
-                    <td class="pts">${r.pts}</td>
-                  </tr>`).join('')}
-              </tbody>
-            </table>
-            <div class="legend">
-              <span><span class="legend-dot" style="background:#1a9bfc"></span>Champions</span>
-              <span><span class="legend-dot" style="background:#f97316"></span>Europa Lg</span>
-              <span><span class="legend-dot" style="background:#e24b4a"></span>Descenso</span>
-            </div>
+          <div class="coming-soon">
+            <div class="coming-soon-icon">🏆</div>
+            Fase de grupos y eliminatorias — próximamente
           </div>`;
+        return;
       }
-    } else if (activeTab === 'goleadores') {
+
       wrap.innerHTML = `
+        <div class="stats-bar">
+          <div class="stat-pill"><div class="stat-num">20</div><div class="stat-lbl">Equipos</div></div>
+          <div class="stat-pill"><div class="stat-num">28</div><div class="stat-lbl">Jornada</div></div>
+          <div class="stat-pill"><div class="stat-num">341</div><div class="stat-lbl">Partidos</div></div>
+        </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>#</th><th>Jugador</th><th>Equipo</th><th>Goles</th><th>Asist.</th></tr></thead>
+            <thead>
+              <tr>
+                <th style="width:28px">#</th>
+                <th>Equipo</th>
+                <th>PJ</th><th>G</th><th>E</th><th>P</th>
+                <th>GF</th><th>GC</th><th>DIF</th>
+                <th>Pts</th>
+                <th>Forma</th>
+              </tr>
+            </thead>
             <tbody>
-              ${sampleScorers.map(r => `
+              ${sampleTable.map(r => `
+                <tr class="zone-${r.zone}">
+                  <td class="col-pos">${r.pos}</td>
+                  <td class="col-team">${r.team}</td>
+                  <td class="col-num">${r.pj}</td>
+                  <td class="col-num">${r.g}</td>
+                  <td class="col-num">${r.e}</td>
+                  <td class="col-num">${r.p}</td>
+                  <td class="col-num">${r.gf}</td>
+                  <td class="col-num">${r.gc}</td>
+                  <td class="col-num">${r.dif}</td>
+                  <td class="col-pts">${r.pts}</td>
+                  <td>
+                    <div class="form-chips">
+                      ${r.form.map(f => `<div class="chip chip-${f.toLowerCase()}">${f}</div>`).join('')}
+                    </div>
+                  </td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+          <div class="legend">
+            <div class="legend-item"><span class="legend-dot" style="background:#1a9bfc"></span>Champions</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#f97316"></span>Europa Lg</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#e24b4a"></span>Descenso</div>
+          </div>
+        </div>`;
+
+    } else if (activeTab === 'goleadores') {
+      const podium = sampleScorers.slice(0,3);
+      const rest   = sampleScorers.slice(3);
+
+      wrap.innerHTML = `
+        <div class="scorer-podium">
+          ${podium.map((r,i) => `
+            <div class="scorer-card ${i===0?'rank-1':''}">
+              <div class="scorer-rank ${i===0?'rank-1':''}">
+                ${i===0 ? '🥇 Goleador' : i===1 ? '# 2' : '# 3'}
+              </div>
+              <div class="scorer-name">${r.name}</div>
+              <div class="scorer-team">${r.team}</div>
+              <div class="scorer-stats">
+                <div>
+                  <div class="scorer-stat-val">${r.goles}</div>
+                  <div class="scorer-stat-lbl">Goles</div>
+                </div>
+                <div>
+                  <div class="scorer-stat-val" style="color:var(--text-muted);font-size:1.3rem">${r.asist}</div>
+                  <div class="scorer-stat-lbl">Asist.</div>
+                </div>
+              </div>
+            </div>`).join('')}
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Jugador</th><th>Equipo</th><th>Goles</th><th>Asist.</th></tr>
+            </thead>
+            <tbody>
+              ${rest.map(r => `
                 <tr>
-                  <td class="pos">${r.pos}</td>
-                  <td class="team-name">${r.name}</td>
-                  <td style="color:var(--muted)">${r.team}</td>
-                  <td class="pts">${r.goles}</td>
-                  <td>${r.as}</td>
+                  <td class="col-pos">${r.pos}</td>
+                  <td class="col-team">${r.name}</td>
+                  <td class="col-num" style="color:var(--text-muted)">${r.team}</td>
+                  <td class="col-pts">${r.goles}</td>
+                  <td class="col-num">${r.asist}</td>
                 </tr>`).join('')}
             </tbody>
           </table>
         </div>`;
+
     } else {
-      wrap.innerHTML = `<div class="coming-soon">📅 Resultados — sección en construcción</div>`;
+      wrap.innerHTML = `
+        <div class="coming-soon">
+          <div class="coming-soon-icon">📅</div>
+          Resultados — sección en construcción
+        </div>`;
     }
   }
 
+  /* ── BÚSQUEDA ──────────────────────────────── */
   function handleSearch() {
     const v = document.getElementById('searchInput').value.trim();
     if (v) alert('Búsqueda de "' + v + '" — función próximamente disponible');
   }
   document.getElementById('searchInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') handleSearch();
+  });
+
+  /* ── NAV TOPBAR ────────────────────────────── */
+  document.querySelectorAll('.topbar-link').forEach(link => {
+    link.addEventListener('click', () => {
+      document.querySelectorAll('.topbar-link').forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+    });
   });
 </script>
 </body>
